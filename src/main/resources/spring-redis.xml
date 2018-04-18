@@ -17,6 +17,7 @@
         <property name="poolConfig" ref="jedisPoolConfig"></property>
         <property name="hostName" value="192.168.134.128"></property>
         <property name="port" value="6379"></property>
+        <property name="password" value="123456"></property>
         <property name="usePool" value="true"></property>
     </bean>
 
