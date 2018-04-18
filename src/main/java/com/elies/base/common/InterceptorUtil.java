@@ -21,52 +21,46 @@ import java.io.IOException;
  * @since 2018/4/18
  */
 public class InterceptorUtil implements HandlerInterceptor {
+
     private static Logger log = LoggerFactory.getLogger(InterceptorUtil.class);
     @Autowired
     RedisService redisService;
 
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception{
+    public  boolean  preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
-        if(!(handler instanceof HandlerMethod)) {
+        if(!(handler instanceof HandlerMethod)){
             return true;
-        } else {
+        }else{
             String sessionId = request.getHeader("sessionId");
-            if(StringUtils.isBlank(sessionId)) {
-                sessionId = request.getParameter("sessionId");
-            }
-
-            if(StringUtils.isBlank(sessionId)) {
-                this.writeMessage(response);
+            if(StringUtils.isBlank(sessionId)){
+                ResponseUtil message = ResponseUtil.fail(ResponseMessage.PARAM_ERROR.getCode(), ResponseMessage.PARAM_ERROR.getMessage());
+                this.writeMessage(response, message);
                 return false;
-            } else {
-                String sessionInfo = redisService.get("JSESSIONID:" + sessionId);
-                if(null == sessionInfo) {
-                    return this.writeTimeOut(response);
-                } else {
-                    redisService.expire("JSESSIONID:" + sessionId, Constant.SESSION_EXPIRE.intValue());
+            }else{
+                String sessionStr = redisService.get(String.format("SESSIONID:%s", sessionId));
+                if(null == sessionStr){
+                    ResponseUtil message = ResponseUtil.fail(ResponseMessage.SESSION_TIMEOUT.getCode(), ResponseMessage.SESSION_TIMEOUT.getMessage());
+                    this.writeMessage(response, message);
+                    return false;
+                }else{
+                    redisService.expire(String.format("SESSIONID:%s", sessionId), Constant.SESSION_EXPIRE.intValue());
                     return true;
                 }
             }
         }
     }
 
-    private void writeMessage(HttpServletResponse res) throws IOException {
-        ResponseUtil result = ResponseUtil.fail(ResponseMessage.PARAM_ERROR.getCode(), ResponseMessage.PARAM_ERROR.getMessage());
-        res.getWriter().write(JSON.toJSONString(result));
-        res.getWriter().flush();
+    private void writeMessage(HttpServletResponse response, ResponseUtil message) throws IOException {
+        response.getWriter().write(JSON.toJSONString(message));
+        response.getWriter().flush();
     }
 
-    private boolean writeTimeOut(HttpServletResponse res) throws IOException {
-        ResponseUtil result = ResponseUtil.fail(ResponseMessage.SESSION_TIMEOUT.getCode(), ResponseMessage.SESSION_TIMEOUT.getMessage());
-        res.getWriter().write(JSON.toJSONString(result));
-        res.getWriter().flush();
-        return false;
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception{
+
     }
 
-    public void postHandle(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, ModelAndView modelAndView) throws Exception {
-    }
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception e) throws Exception {
 
-    public void afterCompletion(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) throws Exception {
     }
 }

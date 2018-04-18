@@ -52,16 +52,10 @@
 			<!--拦截指定路径-->
 			<!--<mvc:mapping path="/user/**" />-->
 			<mvc:mapping path="/**"/>
+			<!--swaggerui的访问路径-->
 			<mvc:exclude-mapping path="/swagger*/**"/>
 			<mvc:exclude-mapping path="/v2/**"/>
 			<mvc:exclude-mapping path="/webjars/**"/>
-
-			<mvc:exclude-mapping path="/session/**"/>
-			<mvc:exclude-mapping path="/register/**"/>
-			<mvc:exclude-mapping path="/uumAbout/**"/>
-			<mvc:exclude-mapping path="/p/**"/>
-			<mvc:exclude-mapping path="/m/**"/>
-			<mvc:exclude-mapping path="/register/**"/>
 			<bean class="com.elies.base.common.InterceptorUtil"/>
 		</mvc:interceptor>
 	</mvc:interceptors>
