@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans
+	   http://www.springframework.org/schema/beans/spring-beans.xsd
+	   http://www.springframework.org/schema/context
+	   http://www.springframework.org/schema/context/spring-context.xsd
+	   http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+	   http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+	<aop:aspectj-autoproxy/>
+	<aop:aspectj-autoproxy proxy-target-class="true" expose-proxy="true"/>
+
+	<!-- 扫描web相关的bean -->
+	<context:component-scan base-package="com.elies.base">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+	<!--<context:component-scan base-package="com.elies.base.controller" />-->
+	<!--如果按照上面被注释这一句这种扫描方式，那么必须要加入下面被注释这一句，SWAGGER才能扫描到controller,否则
+		swagger虽然能够顺利启动，但是下拉框里并不会出现配置的接口-->
+	<!-- <context:component-scan base-package="springfox.*"/> -->
+
+	<!-- 开启SpringMVC注解模式 -->
+	<mvc:annotation-driven>
+		<mvc:message-converters register-defaults="true">
+			<bean class="org.springframework.http.converter.StringHttpMessageConverter">
+				<constructor-arg value="UTF-8"/>
+			</bean>
+			<bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+				<property name="fastJsonConfig" ref="fastJsonConfig" />
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<!-- 静态资源默认servlet配置 -->
+	<mvc:default-servlet-handler/>
+
+
+	<!-- 配置jsp 显示ViewResolver -->
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+		<property name="prefix" value="/WEB-INF/views/"/>
+		<property name="suffix" value=".jsp"/>
+	</bean>
+
+</beans>
